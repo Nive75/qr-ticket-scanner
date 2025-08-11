@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: qr-ticket-scanner
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server-test.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: JWT_SECRET
+        value: Apres_lheure_cest_plus_lheure_franchement
+      - key: FRONTEND_URL
+        value: https://qr-ticket-scanner.onrender.com
