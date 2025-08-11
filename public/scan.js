@@ -23,6 +23,7 @@ class TicketScanner {
             stopScanBtn: document.getElementById('stopScanBtn'),
             showStatsBtn: document.getElementById('showStatsBtn'),
             clearResultsBtn: document.getElementById('clearResultsBtn'),
+            testBtn: document.getElementById('testBtn'),
             resultContainer: document.getElementById('resultContainer'),
             resultTitle: document.getElementById('resultTitle'),
             ticketInfo: document.getElementById('ticketInfo'),
@@ -41,6 +42,7 @@ class TicketScanner {
         this.elements.stopScanBtn.addEventListener('click', () => this.stopScan());
         this.elements.showStatsBtn.addEventListener('click', () => this.toggleStats());
         this.elements.clearResultsBtn.addEventListener('click', () => this.clearResults());
+        this.elements.testBtn.addEventListener('click', () => this.testScanner());
         
         // Écouter les changements de connectivité
         window.addEventListener('online', () => this.handleOnlineStatus(true));
@@ -61,6 +63,13 @@ class TicketScanner {
         }
     }
 
+    testScanner() {
+        console.log('Test du scanner...');
+        // Simuler un scan réussi avec un token de test
+        const testToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyZXNlcnZhdGlvbklkIjoxLCJ1c2VySWQiOjEsInNwZWN0YWNsZUlkIjoxLCJpYXQiOjE3MzQ5NzE3NzEsImV4cCI6MTczNTA1ODA3MX0.test';
+        this.handleScanResult(testToken);
+    }
+
     async startScan() {
         if (this.isScanning) return;
 
@@ -74,17 +83,19 @@ class TicketScanner {
             const config = {
                 fps: 10,
                 qrbox: { width: 250, height: 250 },
-                aspectRatio: 1.0,
-                supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
+                aspectRatio: 1.0
             };
 
             this.html5QrcodeScanner = new Html5Qrcode("reader");
+            
+            console.log('Démarrage du scanner...');
             
             // Démarrer le scan
             await this.html5QrcodeScanner.start(
                 { facingMode: "environment" }, // Utiliser la caméra arrière sur mobile
                 config,
                 (decodedText, decodedResult) => {
+                    console.log('QR Code détecté:', decodedText);
                     this.handleScanResult(decodedText);
                 },
                 (errorMessage) => {
