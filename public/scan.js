@@ -26,6 +26,7 @@ class TicketScanner {
             showStatsBtn: document.getElementById('showStatsBtn'),
             clearResultsBtn: document.getElementById('clearResultsBtn'),
             testBtn: document.getElementById('testBtn'),
+            testDataBtn: document.getElementById('testDataBtn'),
             continueBtn: document.getElementById('continueBtn'),
             resultContainer: document.getElementById('resultContainer'),
             resultTitle: document.getElementById('resultTitle'),
@@ -46,6 +47,7 @@ class TicketScanner {
         this.elements.showStatsBtn.addEventListener('click', () => this.toggleStats());
         this.elements.clearResultsBtn.addEventListener('click', () => this.clearResults());
         this.elements.testBtn.addEventListener('click', () => this.testScanner());
+        this.elements.testDataBtn.addEventListener('click', () => this.testData());
         this.elements.continueBtn.addEventListener('click', () => this.continueScanning());
         
         // Écouter les changements de connectivité
@@ -68,10 +70,16 @@ class TicketScanner {
     }
 
     testScanner() {
-        console.log('Scan manuel...');
-        // Simuler un scan réussi avec le format exact
+        console.log('Démarrage du scan dynamique...');
+        // Démarrer le vrai scanner avec la caméra
+        this.startScan();
+    }
+
+    testData() {
+        console.log('Test avec données simulées...');
+        // Simuler un scan réussi avec le format exact (pour tests uniquement)
         const testData = {
-            reservation_id: Math.floor(Math.random() * 1000) + 1, // ID aléatoire pour éviter les doublons
+            reservation_id: Math.floor(Math.random() * 1000) + 1,
             spectacle_title: "L'autre, c'est moi",
             date_spectacle: "2025-11-15T00:00:00.000Z",
             heure_spectacle: "21:00:00",
@@ -91,11 +99,15 @@ class TicketScanner {
             this.elements.stopScanBtn.style.display = 'inline-block';
             this.elements.statusIndicator.className = 'status-indicator scanning';
 
-            // Configuration du scanner
+            // Configuration du scanner optimisée pour mobile
             const config = {
                 fps: 10,
-                qrbox: { width: 250, height: 250 },
-                aspectRatio: 1.0
+                qrbox: { width: 300, height: 300 },
+                aspectRatio: 1.0,
+                disableFlip: false,
+                experimentalFeatures: {
+                    useBarCodeDetectorIfSupported: true
+                }
             };
 
             this.html5QrcodeScanner = new Html5Qrcode("reader");
@@ -107,12 +119,14 @@ class TicketScanner {
                 { facingMode: "environment" }, // Utiliser la caméra arrière sur mobile
                 config,
                 (decodedText, decodedResult) => {
-                    console.log('QR Code détecté:', decodedText);
+                    console.log('🎯 QR Code détecté!');
+                    console.log('📄 Contenu:', decodedText);
+                    console.log('🔍 Détails:', decodedResult);
                     this.handleScanResult(decodedText);
                 },
                 (errorMessage) => {
                     // Erreurs de scan ignorées (continuer à scanner)
-                    console.log('Scan error:', errorMessage);
+                    console.log('⚠️ Scan error:', errorMessage);
                 }
             );
 
@@ -424,8 +438,8 @@ class TicketScanner {
         this.elements.continueBtn.style.display = 'none';
         this.elements.statusIndicator.className = 'status-indicator';
         
-        // Ne pas redémarrer automatiquement le scan
-        // L'utilisateur doit cliquer sur "Scan" pour scanner le prochain billet
+        // Redémarrer automatiquement le scan pour le prochain billet
+        this.startScan();
     }
 
     clearResults() {
