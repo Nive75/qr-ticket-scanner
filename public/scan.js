@@ -2,6 +2,8 @@ class TicketScanner {
     constructor() {
         this.html5QrcodeScanner = null;
         this.isScanning = false;
+        this.isProcessing = false; // Pour éviter les scans multiples
+        this.scannedTickets = new Set(); // Pour tracker les billets déjà scannés
         this.stats = {
             totalScanned: 0,
             validTickets: 0,
@@ -66,10 +68,10 @@ class TicketScanner {
     }
 
     testScanner() {
-        console.log('Test du scanner...');
+        console.log('Scan manuel...');
         // Simuler un scan réussi avec le format exact
         const testData = {
-            reservation_id: 3,
+            reservation_id: Math.floor(Math.random() * 1000) + 1, // ID aléatoire pour éviter les doublons
             spectacle_title: "L'autre, c'est moi",
             date_spectacle: "2025-11-15T00:00:00.000Z",
             heure_spectacle: "21:00:00",
@@ -140,6 +142,14 @@ class TicketScanner {
     }
 
     async handleScanResult(decodedText) {
+        // Éviter les scans multiples
+        if (this.isProcessing) {
+            console.log('Scan en cours, ignoré');
+            return;
+        }
+        
+        this.isProcessing = true;
+        
         // Arrêter temporairement le scan pour éviter les scans multiples
         await this.stopScan();
         
@@ -158,9 +168,18 @@ class TicketScanner {
                 return;
             }
 
+            // Créer un identifiant unique pour ce billet
+            const ticketId = `${ticketData.reservation_id}_${ticketData.spectacle_title}_${ticketData.date_spectacle}`;
+            
+            // Vérifier si ce billet a déjà été scanné
+            if (this.scannedTickets.has(ticketId)) {
+                this.showError('Ce billet a déjà été scanné');
+                return;
+            }
+
             // Vérifier si nous sommes en ligne
             if (navigator.onLine) {
-                await this.verifyTicketOnline(ticketData);
+                await this.verifyTicketOnline(ticketData, ticketId);
             } else {
                 this.handleOfflineScan(ticketData);
             }
@@ -169,10 +188,11 @@ class TicketScanner {
             this.showError('Erreur lors de la vérification du billet');
         } finally {
             this.showLoading(false);
+            this.isProcessing = false;
         }
     }
 
-    async verifyTicketOnline(data) {
+    async verifyTicketOnline(data, ticketId) {
         try {
             const response = await fetch('/verify-ticket', {
                 method: 'POST',
@@ -186,10 +206,14 @@ class TicketScanner {
             
             if (response.ok) {
                 if (result.success) {
+                    // Ajouter le billet à la liste des billets scannés
+                    this.scannedTickets.add(ticketId);
                     this.showSuccess(result);
                 } else {
                     // Vérifier si c'est un billet déjà utilisé
                     if (result.message.includes('déjà utilisé')) {
+                        // Ajouter le billet à la liste même s'il est déjà utilisé
+                        this.scannedTickets.add(ticketId);
                         this.showUsedTicket(result);
                     } else {
                         this.showError(result.message, result.ticketInfo);
@@ -400,10 +424,8 @@ class TicketScanner {
         this.elements.continueBtn.style.display = 'none';
         this.elements.statusIndicator.className = 'status-indicator';
         
-        // Redémarrer le scan
-        if (!this.isScanning) {
-            this.startScan();
-        }
+        // Ne pas redémarrer automatiquement le scan
+        // L'utilisateur doit cliquer sur "Scan" pour scanner le prochain billet
     }
 
     clearResults() {
@@ -415,6 +437,7 @@ class TicketScanner {
             validTickets: 0,
             invalidTickets: 0
         };
+        this.scannedTickets.clear(); // Vider la liste des billets scannés
         this.updateStats();
     }
 
