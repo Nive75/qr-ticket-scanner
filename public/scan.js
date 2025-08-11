@@ -65,9 +65,17 @@ class TicketScanner {
 
     testScanner() {
         console.log('Test du scanner...');
-        // Simuler un scan réussi avec un token de test
-        const testToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyZXNlcnZhdGlvbklkIjoxLCJ1c2VySWQiOjEsInNwZWN0YWNsZUlkIjoxLCJpYXQiOjE3MzQ5NzE3NzEsImV4cCI6MTczNTA1ODA3MX0.test';
-        this.handleScanResult(testToken);
+        // Simuler un scan réussi avec le format exact
+        const testData = {
+            reservation_id: 3,
+            spectacle_title: "L'autre, c'est moi",
+            date_spectacle: "2025-11-15T00:00:00.000Z",
+            heure_spectacle: "21:00:00",
+            nb_places: 1,
+            type: "ticket_validation",
+            timestamp: "2025-08-11T22:13:52.337Z"
+        };
+        this.handleScanResult(JSON.stringify(testData));
     }
 
     async startScan() {
@@ -137,11 +145,22 @@ class TicketScanner {
         this.elements.statusIndicator.className = 'status-indicator scanning';
 
         try {
+            // Essayer de parser le JSON du QR code
+            let ticketData;
+            try {
+                ticketData = JSON.parse(decodedText);
+                console.log('Données du billet:', ticketData);
+            } catch (parseError) {
+                console.error('Erreur de parsing JSON:', parseError);
+                this.showError('Format de QR code invalide');
+                return;
+            }
+
             // Vérifier si nous sommes en ligne
             if (navigator.onLine) {
-                await this.verifyTicketOnline(decodedText);
+                await this.verifyTicketOnline(ticketData);
             } else {
-                this.handleOfflineScan(decodedText);
+                this.handleOfflineScan(ticketData);
             }
         } catch (error) {
             console.error('Erreur lors de la vérification:', error);
@@ -158,14 +177,14 @@ class TicketScanner {
         }, 3000);
     }
 
-    async verifyTicketOnline(token) {
+    async verifyTicketOnline(data) {
         try {
             const response = await fetch('/verify-ticket', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ token })
+                body: JSON.stringify({ ticketData: data })
             });
 
             const result = await response.json();
@@ -182,7 +201,7 @@ class TicketScanner {
         } catch (error) {
             console.error('Erreur réseau:', error);
             // En cas d'erreur réseau, sauvegarder pour traitement hors ligne
-            this.handleOfflineScan(token);
+            this.handleOfflineScan(data);
         }
     }
 
@@ -268,12 +287,13 @@ class TicketScanner {
     formatTicketInfo(ticketInfo) {
         return `
             <h3>Informations du Billet</h3>
-            <p><strong>Spectacle:</strong> ${ticketInfo.spectacleTitle}</p>
-            <p><strong>Date:</strong> ${new Date(ticketInfo.dateSpectacle).toLocaleDateString('fr-FR')}</p>
-            <p><strong>Heure:</strong> ${ticketInfo.heureSpectacle}</p>
-            <p><strong>Lieu:</strong> ${ticketInfo.lieu}</p>
-            <p><strong>Client:</strong> ${ticketInfo.prenom} ${ticketInfo.nom}</p>
-            <p><strong>Places:</strong> ${ticketInfo.nbPlaces}</p>
+            <p><strong>Réservation:</strong> #${ticketInfo.reservation_id}</p>
+            <p><strong>Spectacle:</strong> ${ticketInfo.spectacle_title}</p>
+            <p><strong>Date:</strong> ${new Date(ticketInfo.date_spectacle).toLocaleDateString('fr-FR')}</p>
+            <p><strong>Heure:</strong> ${ticketInfo.heure_spectacle}</p>
+            <p><strong>Places:</strong> ${ticketInfo.nb_places}</p>
+            <p><strong>Type:</strong> ${ticketInfo.type}</p>
+            <p><strong>Généré le:</strong> ${new Date(ticketInfo.timestamp).toLocaleString('fr-FR')}</p>
             ${ticketInfo.usedAt ? `<p><strong>Scanné le:</strong> ${new Date(ticketInfo.usedAt).toLocaleString('fr-FR')}</p>` : ''}
         `;
     }

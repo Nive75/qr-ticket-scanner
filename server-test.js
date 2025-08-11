@@ -23,27 +23,32 @@ app.get('/scan', (req, res) => {
 // Route pour vérifier un billet scanné (version de test sans DB)
 app.post('/verify-ticket', async (req, res) => {
   try {
-    const { token } = req.body;
+    const { ticketData } = req.body;
     
-    if (!token) {
+    if (!ticketData) {
       return res.status(400).json({
         success: false,
-        message: 'Token manquant'
+        message: 'Données du billet manquantes'
       });
     }
 
-    // Vérifier et décoder le JWT
-    let decoded;
-    try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET);
-    } catch (jwtError) {
-      return res.status(401).json({
+    console.log('Données reçues:', ticketData);
+
+    // Vérifier que les données requises sont présentes
+    if (!ticketData.reservation_id || !ticketData.spectacle_title || !ticketData.type) {
+      return res.status(400).json({
         success: false,
-        message: 'Token invalide ou expiré'
+        message: 'Données du billet incomplètes'
       });
     }
 
-    const { reservationId, userId, spectacleId } = decoded;
+    // Vérifier que c'est bien un ticket de validation
+    if (ticketData.type !== 'ticket_validation') {
+      return res.status(400).json({
+        success: false,
+        message: 'Type de billet invalide'
+      });
+    }
 
     // Simulation de vérification (pour test)
     // En mode réel, on vérifierait dans la base de données
@@ -54,10 +59,9 @@ app.post('/verify-ticket', async (req, res) => {
         success: false,
         message: 'Billet déjà utilisé',
         ticketInfo: {
-          reservationId,
-          userId,
-          spectacleId,
-          status: 'used'
+          ...ticketData,
+          status: 'used',
+          usedAt: new Date().toISOString()
         }
       });
     } else {
@@ -65,15 +69,8 @@ app.post('/verify-ticket', async (req, res) => {
         success: true,
         message: 'Billet valide',
         ticketInfo: {
-          reservationId,
-          userId,
-          spectacleId,
-          status: 'valid',
-          spectacleTitle: 'Spectacle de test',
-          dateSpectacle: '2024-01-15',
-          heureSpectacle: '20:00',
-          lieu: 'Salle de spectacle',
-          nbPlaces: 2
+          ...ticketData,
+          status: 'valid'
         }
       });
     }
