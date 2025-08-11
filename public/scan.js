@@ -24,6 +24,7 @@ class TicketScanner {
             showStatsBtn: document.getElementById('showStatsBtn'),
             clearResultsBtn: document.getElementById('clearResultsBtn'),
             testBtn: document.getElementById('testBtn'),
+            continueBtn: document.getElementById('continueBtn'),
             resultContainer: document.getElementById('resultContainer'),
             resultTitle: document.getElementById('resultTitle'),
             ticketInfo: document.getElementById('ticketInfo'),
@@ -43,6 +44,7 @@ class TicketScanner {
         this.elements.showStatsBtn.addEventListener('click', () => this.toggleStats());
         this.elements.clearResultsBtn.addEventListener('click', () => this.clearResults());
         this.elements.testBtn.addEventListener('click', () => this.testScanner());
+        this.elements.continueBtn.addEventListener('click', () => this.continueScanning());
         
         // Écouter les changements de connectivité
         window.addEventListener('online', () => this.handleOnlineStatus(true));
@@ -152,7 +154,7 @@ class TicketScanner {
                 console.log('Données du billet:', ticketData);
             } catch (parseError) {
                 console.error('Erreur de parsing JSON:', parseError);
-                this.showError('Format de QR code invalide');
+                this.showError('QR code non reconnu');
                 return;
             }
 
@@ -168,13 +170,6 @@ class TicketScanner {
         } finally {
             this.showLoading(false);
         }
-
-        // Redémarrer le scan après un délai
-        setTimeout(() => {
-            if (!this.isScanning) {
-                this.startScan();
-            }
-        }, 3000);
     }
 
     async verifyTicketOnline(data) {
@@ -190,7 +185,16 @@ class TicketScanner {
             const result = await response.json();
             
             if (response.ok) {
-                this.showSuccess(result);
+                if (result.success) {
+                    this.showSuccess(result);
+                } else {
+                    // Vérifier si c'est un billet déjà utilisé
+                    if (result.message.includes('déjà utilisé')) {
+                        this.showUsedTicket(result);
+                    } else {
+                        this.showError(result.message, result.ticketInfo);
+                    }
+                }
             } else {
                 this.showError(result.message, result.ticketInfo);
             }
@@ -254,6 +258,7 @@ class TicketScanner {
         }
         
         this.elements.resultContainer.style.display = 'block';
+        this.elements.continueBtn.style.display = 'inline-block';
         
         // Son de succès (si supporté)
         this.playSound('success');
@@ -271,9 +276,26 @@ class TicketScanner {
         }
         
         this.elements.resultContainer.style.display = 'block';
+        this.elements.continueBtn.style.display = 'inline-block';
         
         // Son d'erreur (si supporté)
         this.playSound('error');
+    }
+
+    showUsedTicket(result) {
+        this.elements.statusIndicator.className = 'status-indicator scanning';
+        this.elements.resultContainer.className = 'result-container used';
+        this.elements.resultTitle.textContent = '🟠 ' + result.message;
+        
+        if (result.ticketInfo) {
+            this.elements.ticketInfo.innerHTML = this.formatTicketInfo(result.ticketInfo);
+        }
+        
+        this.elements.resultContainer.style.display = 'block';
+        this.elements.continueBtn.style.display = 'inline-block';
+        
+        // Son d'avertissement (si supporté)
+        this.playSound('warning');
     }
 
     showWarning(message, details = '') {
@@ -308,7 +330,22 @@ class TicketScanner {
             oscillator.connect(gainNode);
             gainNode.connect(audioContext.destination);
             
-            oscillator.frequency.setValueAtTime(type === 'success' ? 800 : 400, audioContext.currentTime);
+            let frequency;
+            switch(type) {
+                case 'success':
+                    frequency = 800;
+                    break;
+                case 'error':
+                    frequency = 400;
+                    break;
+                case 'warning':
+                    frequency = 600;
+                    break;
+                default:
+                    frequency = 500;
+            }
+            
+            oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
             gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
             
             oscillator.start(audioContext.currentTime);
@@ -358,8 +395,20 @@ class TicketScanner {
         }
     }
 
+    continueScanning() {
+        this.elements.resultContainer.style.display = 'none';
+        this.elements.continueBtn.style.display = 'none';
+        this.elements.statusIndicator.className = 'status-indicator';
+        
+        // Redémarrer le scan
+        if (!this.isScanning) {
+            this.startScan();
+        }
+    }
+
     clearResults() {
         this.elements.resultContainer.style.display = 'none';
+        this.elements.continueBtn.style.display = 'none';
         this.elements.statusIndicator.className = 'status-indicator';
         this.stats = {
             totalScanned: 0,

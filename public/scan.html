@@ -115,6 +115,12 @@
             color: #ef6c00;
         }
 
+        .result-container.used {
+            background: #fff8e1;
+            border: 2px solid #ffc107;
+            color: #f57f17;
+        }
+
         @keyframes slideIn {
             from {
                 opacity: 0;
@@ -330,6 +336,7 @@
         <div class="result-container" id="resultContainer">
             <div class="result-title" id="resultTitle"></div>
             <div class="ticket-info" id="ticketInfo"></div>
+            <button class="btn btn-primary" id="continueBtn" style="margin-top: 15px; display: none;">OK - Scanner suivant</button>
         </div>
 
         <div class="controls">
