@@ -26,7 +26,6 @@ class TicketScanner {
             showStatsBtn: document.getElementById('showStatsBtn'),
             clearResultsBtn: document.getElementById('clearResultsBtn'),
             testBtn: document.getElementById('testBtn'),
-            testDataBtn: document.getElementById('testDataBtn'),
             continueBtn: document.getElementById('continueBtn'),
             resultContainer: document.getElementById('resultContainer'),
             resultTitle: document.getElementById('resultTitle'),
@@ -47,7 +46,6 @@ class TicketScanner {
         this.elements.showStatsBtn.addEventListener('click', () => this.toggleStats());
         this.elements.clearResultsBtn.addEventListener('click', () => this.clearResults());
         this.elements.testBtn.addEventListener('click', () => this.testScanner());
-        this.elements.testDataBtn.addEventListener('click', () => this.testData());
         this.elements.continueBtn.addEventListener('click', () => this.continueScanning());
         
         // Écouter les changements de connectivité
@@ -75,20 +73,7 @@ class TicketScanner {
         this.startScan();
     }
 
-    testData() {
-        console.log('Test avec données simulées...');
-        // Simuler un scan réussi avec le format exact (pour tests uniquement)
-        const testData = {
-            reservation_id: Math.floor(Math.random() * 1000) + 1,
-            spectacle_title: "L'autre, c'est moi",
-            date_spectacle: "2025-11-15T00:00:00.000Z",
-            heure_spectacle: "21:00:00",
-            nb_places: 1,
-            type: "ticket_validation",
-            timestamp: "2025-08-11T22:13:52.337Z"
-        };
-        this.handleScanResult(JSON.stringify(testData));
-    }
+
 
     async startScan() {
         if (this.isScanning) return;
