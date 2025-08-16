@@ -6,314 +6,175 @@
     <title>Connexion - Scanner de Billets</title>
     <style>
         /**
-         * 🔐 Styles CSS pour la page de connexion - Version Professionnelle
-         * Design moderne et ergonomique cohérent avec l'interface principale
+         * 🔐 Styles CSS pour la page de connexion
+         * Design moderne et sécurisé
          */
 
-        /* Variables CSS pour la cohérence des couleurs */
-        :root {
-            --primary: #1e40af;
-            --primary-light: #3b82f6;
-            --primary-dark: #1e3a8a;
-            --secondary: #64748b;
-            --success: #059669;
-            --warning: #d97706;
-            --error: #dc2626;
-            --background: #f8fafc;
-            --surface: #ffffff;
-            --text-primary: #1e293b;
-            --text-secondary: #64748b;
-            --border: #e2e8f0;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Reset CSS moderne */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
-        /* Style du corps de la page */
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--background);
-            color: var(--text-primary);
-            line-height: 1.6;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 1rem;
+            padding: 20px;
         }
 
-        /* Conteneur principal de connexion */
         .login-container {
-            background: var(--surface);
-            border-radius: 16px;
-            box-shadow: var(--shadow-lg);
-            padding: 3rem;
-            max-width: 450px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 400px;
             width: 100%;
-            border: 1px solid var(--border);
-        }
-
-        /* En-tête de connexion */
-        .login-header {
             text-align: center;
-            margin-bottom: 2.5rem;
         }
 
-        .login-logo {
-            width: 64px;
-            height: 64px;
-            background: var(--primary);
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 1.5rem;
+        .header {
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
             font-size: 2rem;
-        }
-
-        .login-title {
-            font-size: 1.75rem;
+            margin-bottom: 10px;
             font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 0.5rem;
         }
 
-        .login-subtitle {
-            color: var(--text-secondary);
+        .header p {
+            color: #666;
             font-size: 1rem;
-        }
-
-        /* Formulaire de connexion */
-        .login-form {
-            margin-bottom: 2rem;
         }
 
         .form-group {
-            margin-bottom: 1.5rem;
+            margin-bottom: 20px;
+            text-align: left;
         }
 
-        .form-label {
+        .form-group label {
             display: block;
-            margin-bottom: 0.5rem;
-            color: var(--text-primary);
-            font-weight: 500;
-            font-size: 0.875rem;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
         }
 
-        .form-input {
+        .form-group input {
             width: 100%;
-            padding: 0.875rem 1rem;
-            border: 2px solid var(--border);
-            border-radius: 8px;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
             font-size: 1rem;
-            transition: all 0.2s ease;
-            background: var(--surface);
-            color: var(--text-primary);
+            transition: border-color 0.3s ease;
         }
 
-        .form-input:focus {
+        .form-group input:focus {
             outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            border-color: #667eea;
         }
 
-        .form-input::placeholder {
-            color: var(--text-secondary);
-        }
-
-        /* Bouton de connexion */
         .login-btn {
             width: 100%;
-            padding: 0.875rem 1.5rem;
-            background: var(--primary);
+            padding: 14px;
+            background: #667eea;
             color: white;
             border: none;
-            border-radius: 8px;
-            font-size: 1rem;
+            border-radius: 10px;
+            font-size: 1.1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
+            transition: all 0.3s ease;
+            margin-top: 10px;
         }
 
         .login-btn:hover {
-            background: var(--primary-dark);
-            transform: translateY(-1px);
+            background: #5a6fd8;
+            transform: translateY(-2px);
         }
 
         .login-btn:disabled {
-            opacity: 0.6;
+            background: #ccc;
             cursor: not-allowed;
             transform: none;
         }
 
-        /* Messages d'état */
-        .message {
-            padding: 1rem;
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 12px;
             border-radius: 8px;
-            margin-bottom: 1.5rem;
-            font-size: 0.875rem;
-            font-weight: 500;
+            margin-top: 15px;
             display: none;
+            border: 1px solid #ffcdd2;
         }
 
-        .message.error {
-            background: #fef2f2;
-            color: var(--error);
-            border: 1px solid #fecaca;
+        .success-message {
+            background: #e8f5e8;
+            color: #2e7d32;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+            border: 1px solid #c8e6c9;
         }
 
-        .message.success {
-            background: #f0fdf4;
-            color: var(--success);
-            border: 1px solid #bbf7d0;
-        }
-
-        /* Informations de sécurité */
         .security-info {
-            background: var(--background);
-            border-radius: 12px;
-            padding: 1.5rem;
-            border: 1px solid var(--border);
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            color: #666;
         }
 
         .security-info h4 {
-            color: var(--text-primary);
-            margin-bottom: 0.75rem;
-            font-size: 1rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+            color: #333;
+            margin-bottom: 8px;
         }
 
-        .security-info p {
-            color: var(--text-secondary);
-            font-size: 0.875rem;
-            line-height: 1.5;
-        }
-
-        /* Footer */
-        .login-footer {
-            text-align: center;
-            margin-top: 2rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid var(--border);
-        }
-
-        .footer-text {
-            color: var(--text-secondary);
-            font-size: 0.75rem;
-        }
-
-        /* Responsive */
         @media (max-width: 480px) {
             .login-container {
-                padding: 2rem 1.5rem;
-                margin: 1rem;
-            }
-
-            .login-title {
-                font-size: 1.5rem;
-            }
-
-            .login-logo {
-                width: 56px;
-                height: 56px;
-                font-size: 1.75rem;
-            }
-        }
-
-        /* Animations */
-        .fade-in {
-            animation: fadeIn 0.5s ease;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* États de focus pour l'accessibilité */
-        .login-btn:focus,
-        .form-input:focus {
-            outline: 2px solid var(--primary);
-            outline-offset: 2px;
-        }
-
-        /* Mode sombre (optionnel) */
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --background: #0f172a;
-                --surface: #1e293b;
-                --text-primary: #f1f5f9;
-                --text-secondary: #94a3b8;
-                --border: #334155;
+                padding: 30px 20px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="login-container fade-in">
-        <!-- En-tête -->
-        <div class="login-header">
-            <div class="login-logo">
-                🎫
-            </div>
-            <h1 class="login-title">Connexion</h1>
-            <p class="login-subtitle">Scanner de Billets - Espace Comédie</p>
+    <div class="login-container">
+        <div class="header">
+            <h1>🔐 Connexion</h1>
+            <p>Scanner de Billets - Espace Comédie</p>
         </div>
 
-        <!-- Formulaire -->
-        <form id="loginForm" class="login-form">
+        <form id="loginForm">
             <div class="form-group">
-                <label for="password" class="form-label">Mot de passe</label>
+                <label for="password">Mot de passe</label>
                 <input 
                     type="password" 
                     id="password" 
                     name="password" 
-                    class="form-input"
-                    placeholder="Entrez le mot de passe d'accès"
+                    placeholder="Entrez le mot de passe"
                     required
                     autocomplete="current-password"
                 >
             </div>
 
             <button type="submit" class="login-btn" id="loginBtn">
-                <span>Se connecter</span>
+                Se connecter
             </button>
         </form>
 
-        <!-- Messages d'état -->
-        <div class="message error" id="errorMessage"></div>
-        <div class="message success" id="successMessage"></div>
+        <div class="error-message" id="errorMessage"></div>
+        <div class="success-message" id="successMessage"></div>
 
-        <!-- Informations de sécurité -->
         <div class="security-info">
             <h4>🔒 Sécurité</h4>
-            <p>Cette interface est protégée par mot de passe pour sécuriser l'accès au scanner de billets. Seuls les employés autorisés peuvent y accéder.</p>
-        </div>
-
-        <!-- Footer -->
-        <div class="login-footer">
-            <p class="footer-text">
-                Version 1.0.0 • Espace Comédie • Interface Employé
-            </p>
+            <p>Cette page est protégée par mot de passe pour sécuriser l'accès au scanner de billets.</p>
         </div>
     </div>
 
@@ -341,11 +202,6 @@
             bindEvents() {
                 this.form.addEventListener('submit', (e) => this.handleLogin(e));
                 this.passwordInput.addEventListener('input', () => this.clearMessages());
-                this.passwordInput.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter') {
-                        this.form.dispatchEvent(new Event('submit'));
-                    }
-                });
             }
 
             /**
@@ -437,9 +293,7 @@
              */
             setLoading(loading) {
                 this.loginBtn.disabled = loading;
-                this.loginBtn.innerHTML = loading 
-                    ? '<span>Connexion...</span>' 
-                    : '<span>Se connecter</span>';
+                this.loginBtn.textContent = loading ? 'Connexion...' : 'Se connecter';
             }
 
             /**

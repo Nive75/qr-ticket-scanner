@@ -147,19 +147,14 @@ class TicketScanner {
             this.elements.stopScanBtn.style.display = 'inline-block';
             this.elements.statusIndicator.className = 'status-indicator scanning';
 
-            // Activer le mode plein écran
-            this.enableFullscreenMode();
-
-            // Configuration optimisée du scanner pour une meilleure détection
+            // Configuration optimisée du scanner pour mobile
             const config = {
-                fps: 30,                                    // Images par seconde (augmenté pour plus de fluidité)
-                qrbox: { width: 400, height: 400 },        // Zone de détection agrandie
+                fps: 10,                                    // Images par seconde
+                qrbox: { width: 300, height: 300 },        // Zone de détection
                 aspectRatio: 1.0,                          // Ratio d'aspect carré
                 disableFlip: false,                        // Permettre la rotation
-                supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA], // Seulement la caméra
                 experimentalFeatures: {
-                    useBarCodeDetectorIfSupported: true,   // Utiliser le détecteur natif si disponible
-                    useMultiFormatReader: true            // Support multi-format
+                    useBarCodeDetectorIfSupported: true    // Utiliser le détecteur natif si disponible
                 }
             };
 
@@ -168,53 +163,22 @@ class TicketScanner {
             
             console.log('Démarrage du scanner...');
             
-            // Essayer différentes configurations de caméra
-            const cameraConfigs = [
-                { 
-                    facingMode: "environment",
-                    width: { ideal: 1920 },
-                    height: { ideal: 1080 }
+            // Démarrage du scan avec la caméra arrière sur mobile
+            await this.html5QrcodeScanner.start(
+                { facingMode: "environment" }, // Utiliser la caméra arrière
+                config,
+                // Callback de succès : QR code détecté
+                (decodedText, decodedResult) => {
+                    console.log('🎯 QR Code détecté!');
+                    console.log('📄 Contenu:', decodedText);
+                    console.log('🔍 Détails:', decodedResult);
+                    this.handleScanResult(decodedText);
                 },
-                { 
-                    facingMode: "environment",
-                    width: { ideal: 1280 },
-                    height: { ideal: 720 }
-                },
-                { 
-                    facingMode: "environment"
+                // Callback d'erreur : erreurs de scan (ignorées)
+                (errorMessage) => {
+                    console.log('⚠️ Scan error:', errorMessage);
                 }
-            ];
-
-            let started = false;
-            for (const cameraConfig of cameraConfigs) {
-                try {
-                    await this.html5QrcodeScanner.start(
-                        cameraConfig,
-                        config,
-                        // Callback de succès : QR code détecté
-                        (decodedText, decodedResult) => {
-                            console.log('🎯 QR Code détecté!');
-                            console.log('📄 Contenu:', decodedText);
-                            console.log('🔍 Détails:', decodedResult);
-                            this.handleScanResult(decodedText);
-                        },
-                        // Callback d'erreur : erreurs de scan (ignorées)
-                        (errorMessage) => {
-                            console.log('⚠️ Scan error:', errorMessage);
-                        }
-                    );
-                    started = true;
-                    console.log('Scanner démarré avec succès avec la configuration:', cameraConfig);
-                    break;
-                } catch (configError) {
-                    console.log('Échec avec la configuration:', cameraConfig, configError);
-                    continue;
-                }
-            }
-
-            if (!started) {
-                throw new Error('Aucune configuration de caméra n\'a fonctionné');
-            }
+            );
 
         } catch (error) {
             console.error('Erreur lors du démarrage du scan:', error);
@@ -245,9 +209,6 @@ class TicketScanner {
         this.elements.startScanBtn.style.display = 'inline-block';
         this.elements.stopScanBtn.style.display = 'none';
         this.elements.statusIndicator.className = 'status-indicator';
-
-        // Désactiver le mode plein écran
-        this.disableFullscreenMode();
     }
 
     /**
@@ -645,38 +606,6 @@ class TicketScanner {
             console.error('Erreur lors du chargement des scans hors ligne:', error);
             this.offlineScans = [];
         }
-    }
-
-    /**
-     * Active le mode plein écran pour le scan
-     */
-    enableFullscreenMode() {
-        // Ajouter les classes CSS pour le mode plein écran
-        document.getElementById('header').classList.add('scanning');
-        document.getElementById('mainContainer').classList.add('scanning');
-        document.getElementById('layoutGrid').classList.add('scanning');
-        document.getElementById('scannerSection').classList.add('scanning');
-        document.getElementById('sidebar').classList.add('scanning');
-        document.getElementById('scanOverlay').classList.add('active');
-
-        // Masquer le scroll du body
-        document.body.style.overflow = 'hidden';
-    }
-
-    /**
-     * Désactive le mode plein écran
-     */
-    disableFullscreenMode() {
-        // Retirer les classes CSS pour le mode plein écran
-        document.getElementById('header').classList.remove('scanning');
-        document.getElementById('mainContainer').classList.remove('scanning');
-        document.getElementById('layoutGrid').classList.remove('scanning');
-        document.getElementById('scannerSection').classList.remove('scanning');
-        document.getElementById('sidebar').classList.remove('scanning');
-        document.getElementById('scanOverlay').classList.remove('active');
-
-        // Restaurer le scroll du body
-        document.body.style.overflow = '';
     }
 
     /**
