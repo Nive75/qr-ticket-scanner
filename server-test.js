@@ -16,7 +16,7 @@ const path = require('path');              // Module pour manipuler les chemins 
 require('dotenv').config({ path: './config.env' }); // Chargement des variables d'environnement
 
 // Configuration du mot de passe (en production, utiliser des variables d'environnement)
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'EspaceComedie2024!';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'EspaceComedie2025!';
 
 // Initialisation de l'application Express
 const app = express();
