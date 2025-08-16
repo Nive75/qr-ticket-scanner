@@ -1,16 +1,39 @@
+# 🎫 Configuration de Déploiement Render - Scanner de QR Codes
+# 
+# Ce fichier configure le déploiement automatique sur Render.com
+# Définit un service web pour héberger l'application de scan
+# 
+# @author Espace Comédie
+# @version 1.0.0
+
+# Configuration des services Render
 services:
-  - type: web
-    name: qr-ticket-scanner
-    env: node
-    plan: free
+  # Service web principal pour l'application
+  - type: web                    # Type de service : application web
+    name: qr-ticket-scanner      # Nom unique du service sur Render
+    env: node                    # Environnement : Node.js
+    plan: free                   # Plan d'hébergement : gratuit
+    
+    # Commande de build : installation des dépendances
     buildCommand: npm install
+    
+    # Commande de démarrage : lancement du serveur
     startCommand: node server-test.js
+    
+    # Variables d'environnement pour la production
     envVars:
+      # Environnement de production
       - key: NODE_ENV
         value: production
+        
+      # Port d'écoute du serveur (Render assigne automatiquement)
       - key: PORT
         value: 10000
+        
+      # Clé secrète pour JWT (version future)
       - key: JWT_SECRET
         value: Apres_lheure_cest_plus_lheure_franchement
+        
+      # URL du frontend pour CORS
       - key: FRONTEND_URL
         value: https://qr-ticket-scanner.onrender.com

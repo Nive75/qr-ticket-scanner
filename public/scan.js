@@ -1,46 +1,90 @@
+/**
+ * 🎫 Scanner de QR Codes - Espace Comédie
+ * 
+ * Classe principale pour gérer le scan de QR codes de billets.
+ * Utilise la bibliothèque html5-qrcode pour la détection de QR codes.
+ * 
+ * @author Espace Comédie
+ * @version 1.0.0
+ */
+
+/**
+ * Classe TicketScanner
+ * Gère toute la logique de scan, vérification et affichage des résultats
+ */
 class TicketScanner {
+    /**
+     * Constructeur de la classe
+     * Initialise tous les composants et états du scanner
+     */
     constructor() {
+        // Instance du scanner HTML5 QR Code
         this.html5QrcodeScanner = null;
-        this.isScanning = false;
-        this.isProcessing = false; // Pour éviter les scans multiples
-        this.scannedTickets = new Set(); // Pour tracker les billets déjà scannés
-        this.stats = {
-            totalScanned: 0,
-            validTickets: 0,
-            invalidTickets: 0
-        };
-        this.offlineScans = [];
         
-        this.initializeElements();
-        this.bindEvents();
-        this.checkOnlineStatus();
-        this.loadOfflineScans();
-        this.updateStats();
+        // États du scanner
+        this.isScanning = false;           // Indique si le scan est en cours
+        this.isProcessing = false;         // Évite les scans multiples simultanés
+        
+        // Gestion des billets déjà scannés (prévention des doublons)
+        this.scannedTickets = new Set();   // Set pour stocker les IDs des billets scannés
+        
+        // Statistiques locales
+        this.stats = {
+            totalScanned: 0,               // Nombre total de billets scannés
+            validTickets: 0,               // Nombre de billets valides
+            invalidTickets: 0              // Nombre de billets invalides
+        };
+        
+        // Gestion du mode hors ligne
+        this.offlineScans = [];            // Scans sauvegardés en mode hors ligne
+        
+        // Initialisation des composants
+        this.initializeElements();         // Récupération des éléments DOM
+        this.bindEvents();                 // Liaison des événements
+        this.checkOnlineStatus();          // Vérification de la connectivité
+        this.loadOfflineScans();           // Chargement des scans hors ligne
+        this.updateStats();                // Mise à jour des statistiques
     }
 
+    /**
+     * Initialise les références vers les éléments DOM
+     * Récupère tous les éléments nécessaires pour l'interface
+     */
     initializeElements() {
         this.elements = {
-            reader: document.getElementById('reader'),
-            startScanBtn: document.getElementById('startScanBtn'),
-            stopScanBtn: document.getElementById('stopScanBtn'),
-            showStatsBtn: document.getElementById('showStatsBtn'),
-            clearResultsBtn: document.getElementById('clearResultsBtn'),
-            testBtn: document.getElementById('testBtn'),
-            continueBtn: document.getElementById('continueBtn'),
-            resultContainer: document.getElementById('resultContainer'),
-            resultTitle: document.getElementById('resultTitle'),
-            ticketInfo: document.getElementById('ticketInfo'),
-            statusIndicator: document.getElementById('statusIndicator'),
-            loading: document.getElementById('loading'),
-            stats: document.getElementById('stats'),
-            offlineIndicator: document.getElementById('offlineIndicator'),
-            totalScanned: document.getElementById('totalScanned'),
-            validTickets: document.getElementById('validTickets'),
-            invalidTickets: document.getElementById('invalidTickets')
+            // Éléments du scanner
+            reader: document.getElementById('reader'),                    // Zone d'affichage du scanner
+            startScanBtn: document.getElementById('startScanBtn'),        // Bouton démarrer le scan
+            stopScanBtn: document.getElementById('stopScanBtn'),          // Bouton arrêter le scan
+            
+            // Éléments de contrôle
+            showStatsBtn: document.getElementById('showStatsBtn'),        // Bouton afficher les stats
+            clearResultsBtn: document.getElementById('clearResultsBtn'),  // Bouton effacer les résultats
+            testBtn: document.getElementById('testBtn'),                  // Bouton test du scanner
+            continueBtn: document.getElementById('continueBtn'),          // Bouton continuer le scan
+            
+            // Éléments d'affichage des résultats
+            resultContainer: document.getElementById('resultContainer'),  // Conteneur des résultats
+            resultTitle: document.getElementById('resultTitle'),          // Titre du résultat
+            ticketInfo: document.getElementById('ticketInfo'),            // Informations du billet
+            statusIndicator: document.getElementById('statusIndicator'),  // Indicateur de statut
+            loading: document.getElementById('loading'),                  // Indicateur de chargement
+            
+            // Éléments des statistiques
+            stats: document.getElementById('stats'),                      // Conteneur des statistiques
+            offlineIndicator: document.getElementById('offlineIndicator'), // Indicateur hors ligne
+            totalScanned: document.getElementById('totalScanned'),        // Total scannés
+            validTickets: document.getElementById('validTickets'),        // Billets valides
+            invalidTickets: document.getElementById('invalidTickets')     // Billets invalides
         };
     }
 
+    /**
+     * Lie les événements aux éléments DOM
+     * Configure tous les listeners d'événements
+     */
     bindEvents() {
+        // Événements des boutons de contrôle
         this.elements.startScanBtn.addEventListener('click', () => this.startScan());
         this.elements.stopScanBtn.addEventListener('click', () => this.stopScan());
         this.elements.showStatsBtn.addEventListener('click', () => this.toggleStats());
@@ -48,69 +92,88 @@ class TicketScanner {
         this.elements.testBtn.addEventListener('click', () => this.testScanner());
         this.elements.continueBtn.addEventListener('click', () => this.continueScanning());
         
-        // Écouter les changements de connectivité
+        // Événements de connectivité réseau
         window.addEventListener('online', () => this.handleOnlineStatus(true));
         window.addEventListener('offline', () => this.handleOnlineStatus(false));
     }
 
-    checkOnlineStatus() {
+    /**
+     * Vérifie le statut de connectivité au démarrage
+     */
+    checkOnlineStatus() {  
         this.handleOnlineStatus(navigator.onLine);
     }
 
+    /**
+     * Gère les changements de statut de connectivité
+     * @param {boolean} isOnline - Indique si l'appareil est en ligne
+     */
     handleOnlineStatus(isOnline) {
         if (isOnline) {
+            // Mode en ligne : masquer l'indicateur hors ligne
             this.elements.offlineIndicator.style.display = 'none';
-            // Synchroniser les scans hors ligne
+            // Synchroniser les scans sauvegardés hors ligne
             this.syncOfflineScans();
         } else {
+            // Mode hors ligne : afficher l'indicateur
             this.elements.offlineIndicator.style.display = 'block';
         }
     }
 
+    /**
+     * Démarre le scanner de test (bouton "Scan")
+     * Lance le vrai scanner avec la caméra
+     */
     testScanner() {
         console.log('Démarrage du scan dynamique...');
         // Démarrer le vrai scanner avec la caméra
         this.startScan();
     }
 
-
-
+    /**
+     * Démarre le scan de QR codes
+     * Configure et lance le scanner HTML5 QR Code
+     */
     async startScan() {
+        // Éviter de démarrer plusieurs scans simultanément
         if (this.isScanning) return;
 
         try {
+            // Mise à jour de l'interface
             this.isScanning = true;
             this.elements.startScanBtn.style.display = 'none';
             this.elements.stopScanBtn.style.display = 'inline-block';
             this.elements.statusIndicator.className = 'status-indicator scanning';
 
-            // Configuration du scanner optimisée pour mobile
+            // Configuration optimisée du scanner pour mobile
             const config = {
-                fps: 10,
-                qrbox: { width: 300, height: 300 },
-                aspectRatio: 1.0,
-                disableFlip: false,
+                fps: 10,                                    // Images par seconde
+                qrbox: { width: 300, height: 300 },        // Zone de détection
+                aspectRatio: 1.0,                          // Ratio d'aspect carré
+                disableFlip: false,                        // Permettre la rotation
                 experimentalFeatures: {
-                    useBarCodeDetectorIfSupported: true
+                    useBarCodeDetectorIfSupported: true    // Utiliser le détecteur natif si disponible
                 }
             };
 
+            // Création de l'instance du scanner
             this.html5QrcodeScanner = new Html5Qrcode("reader");
             
             console.log('Démarrage du scanner...');
             
-            // Démarrer le scan
+            // Démarrage du scan avec la caméra arrière sur mobile
             await this.html5QrcodeScanner.start(
-                { facingMode: "environment" }, // Utiliser la caméra arrière sur mobile
+                { facingMode: "environment" }, // Utiliser la caméra arrière
                 config,
+                // Callback de succès : QR code détecté
                 (decodedText, decodedResult) => {
                     console.log('🎯 QR Code détecté!');
                     console.log('📄 Contenu:', decodedText);
                     console.log('🔍 Détails:', decodedResult);
                     this.handleScanResult(decodedText);
                 },
+                // Callback d'erreur : erreurs de scan (ignorées)
                 (errorMessage) => {
-                    // Erreurs de scan ignorées (continuer à scanner)
                     console.log('⚠️ Scan error:', errorMessage);
                 }
             );
@@ -122,10 +185,15 @@ class TicketScanner {
         }
     }
 
+    /**
+     * Arrête le scan de QR codes
+     * Nettoie les ressources du scanner
+     */
     async stopScan() {
         if (!this.isScanning) return;
 
         try {
+            // Arrêt et nettoyage du scanner
             if (this.html5QrcodeScanner) {
                 await this.html5QrcodeScanner.stop();
                 this.html5QrcodeScanner.clear();
@@ -134,14 +202,20 @@ class TicketScanner {
             console.error('Erreur lors de l\'arrêt du scan:', error);
         }
 
+        // Mise à jour de l'interface
         this.isScanning = false;
         this.elements.startScanBtn.style.display = 'inline-block';
         this.elements.stopScanBtn.style.display = 'none';
         this.elements.statusIndicator.className = 'status-indicator';
     }
 
+    /**
+     * Traite le résultat d'un scan de QR code
+     * Parse le JSON et vérifie le billet
+     * @param {string} decodedText - Texte décodé du QR code
+     */
     async handleScanResult(decodedText) {
-        // Éviter les scans multiples
+        // Éviter les scans multiples simultanés
         if (this.isProcessing) {
             console.log('Scan en cours, ignoré');
             return;
@@ -152,11 +226,12 @@ class TicketScanner {
         // Arrêter temporairement le scan pour éviter les scans multiples
         await this.stopScan();
         
+        // Affichage du chargement
         this.showLoading(true);
         this.elements.statusIndicator.className = 'status-indicator scanning';
 
         try {
-            // Essayer de parser le JSON du QR code
+            // Tentative de parsing du JSON du QR code
             let ticketData;
             try {
                 ticketData = JSON.parse(decodedText);
@@ -167,16 +242,16 @@ class TicketScanner {
                 return;
             }
 
-            // Créer un identifiant unique pour ce billet
+            // Création d'un identifiant unique pour ce billet
             const ticketId = `${ticketData.reservation_id}_${ticketData.spectacle_title}_${ticketData.date_spectacle}`;
             
-            // Vérifier si ce billet a déjà été scanné
+            // Vérification si ce billet a déjà été scanné
             if (this.scannedTickets.has(ticketId)) {
                 this.showError('Ce billet a déjà été scanné');
                 return;
             }
 
-            // Vérifier si nous sommes en ligne
+            // Vérification de la connectivité pour le traitement
             if (navigator.onLine) {
                 await this.verifyTicketOnline(ticketData, ticketId);
             } else {
@@ -191,8 +266,14 @@ class TicketScanner {
         }
     }
 
+    /**
+     * Vérifie un billet en ligne via l'API
+     * @param {Object} data - Données du billet
+     * @param {string} ticketId - Identifiant unique du billet
+     */
     async verifyTicketOnline(data, ticketId) {
         try {
+            // Envoi de la requête de vérification au serveur
             const response = await fetch('/verify-ticket', {
                 method: 'POST',
                 headers: {
@@ -205,7 +286,7 @@ class TicketScanner {
             
             if (response.ok) {
                 if (result.success) {
-                    // Ajouter le billet à la liste des billets scannés
+                    // Billet valide : ajouter à la liste des scannés
                     this.scannedTickets.add(ticketId);
                     this.showSuccess(result);
                 } else {
@@ -222,7 +303,7 @@ class TicketScanner {
                 this.showError(result.message, result.ticketInfo);
             }
 
-            // Mettre à jour les statistiques
+            // Mise à jour des statistiques
             this.updateStatsFromResult(result.success);
             
         } catch (error) {
@@ -232,6 +313,11 @@ class TicketScanner {
         }
     }
 
+    /**
+     * Gère un scan en mode hors ligne
+     * Sauvegarde le scan pour traitement ultérieur
+     * @param {Object} token - Données du billet
+     */
     handleOfflineScan(token) {
         const scanData = {
             token,
@@ -248,6 +334,10 @@ class TicketScanner {
         );
     }
 
+    /**
+     * Synchronise les scans sauvegardés hors ligne
+     * Traite tous les scans en attente quand la connexion est rétablie
+     */
     async syncOfflineScans() {
         if (this.offlineScans.length === 0) return;
 
@@ -267,10 +357,18 @@ class TicketScanner {
         this.saveOfflineScans();
     }
 
+    /**
+     * Affiche/masque l'indicateur de chargement
+     * @param {boolean} show - Afficher ou masquer le chargement
+     */
     showLoading(show) {
         this.elements.loading.style.display = show ? 'block' : 'none';
     }
 
+    /**
+     * Affiche un résultat de succès (billet valide)
+     * @param {Object} result - Résultat de la vérification
+     */
     showSuccess(result) {
         this.elements.statusIndicator.className = 'status-indicator success';
         this.elements.resultContainer.className = 'result-container success';
@@ -283,10 +381,15 @@ class TicketScanner {
         this.elements.resultContainer.style.display = 'block';
         this.elements.continueBtn.style.display = 'inline-block';
         
-        // Son de succès (si supporté)
+        // Son de succès
         this.playSound('success');
     }
 
+    /**
+     * Affiche un résultat d'erreur (billet invalide)
+     * @param {string} message - Message d'erreur
+     * @param {Object} ticketInfo - Informations du billet (optionnel)
+     */
     showError(message, ticketInfo = null) {
         this.elements.statusIndicator.className = 'status-indicator error';
         this.elements.resultContainer.className = 'result-container error';
@@ -301,10 +404,14 @@ class TicketScanner {
         this.elements.resultContainer.style.display = 'block';
         this.elements.continueBtn.style.display = 'inline-block';
         
-        // Son d'erreur (si supporté)
+        // Son d'erreur
         this.playSound('error');
     }
 
+    /**
+     * Affiche un billet déjà utilisé
+     * @param {Object} result - Résultat de la vérification
+     */
     showUsedTicket(result) {
         this.elements.statusIndicator.className = 'status-indicator scanning';
         this.elements.resultContainer.className = 'result-container used';
@@ -317,10 +424,15 @@ class TicketScanner {
         this.elements.resultContainer.style.display = 'block';
         this.elements.continueBtn.style.display = 'inline-block';
         
-        // Son d'avertissement (si supporté)
+        // Son d'avertissement
         this.playSound('warning');
     }
 
+    /**
+     * Affiche un avertissement (mode hors ligne)
+     * @param {string} message - Message d'avertissement
+     * @param {string} details - Détails supplémentaires
+     */
     showWarning(message, details = '') {
         this.elements.statusIndicator.className = 'status-indicator scanning';
         this.elements.resultContainer.className = 'result-container warning';
@@ -329,6 +441,11 @@ class TicketScanner {
         this.elements.resultContainer.style.display = 'block';
     }
 
+    /**
+     * Formate les informations du billet pour l'affichage
+     * @param {Object} ticketInfo - Informations du billet
+     * @returns {string} HTML formaté
+     */
     formatTicketInfo(ticketInfo) {
         return `
             <h3>Informations du Billet</h3>
@@ -343,8 +460,12 @@ class TicketScanner {
         `;
     }
 
+    /**
+     * Joue un son de notification
+     * @param {string} type - Type de son ('success', 'error', 'warning')
+     */
     playSound(type) {
-        // Créer un contexte audio simple pour les notifications sonores
+        // Création d'un contexte audio simple pour les notifications sonores
         try {
             const audioContext = new (window.AudioContext || window.webkitAudioContext)();
             const oscillator = audioContext.createOscillator();
@@ -353,19 +474,13 @@ class TicketScanner {
             oscillator.connect(gainNode);
             gainNode.connect(audioContext.destination);
             
+            // Fréquence selon le type de son
             let frequency;
             switch(type) {
-                case 'success':
-                    frequency = 800;
-                    break;
-                case 'error':
-                    frequency = 400;
-                    break;
-                case 'warning':
-                    frequency = 600;
-                    break;
-                default:
-                    frequency = 500;
+                case 'success': frequency = 800; break;  // Son aigu pour succès
+                case 'error': frequency = 400; break;    // Son grave pour erreur
+                case 'warning': frequency = 600; break;  // Son moyen pour avertissement
+                default: frequency = 500;
             }
             
             oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
@@ -378,6 +493,10 @@ class TicketScanner {
         }
     }
 
+    /**
+     * Met à jour les statistiques selon le résultat
+     * @param {boolean} isValid - Indique si le billet est valide
+     */
     updateStatsFromResult(isValid) {
         this.stats.totalScanned++;
         if (isValid) {
@@ -388,12 +507,18 @@ class TicketScanner {
         this.updateStats();
     }
 
+    /**
+     * Met à jour l'affichage des statistiques
+     */
     updateStats() {
         this.elements.totalScanned.textContent = this.stats.totalScanned;
         this.elements.validTickets.textContent = this.stats.validTickets;
         this.elements.invalidTickets.textContent = this.stats.invalidTickets;
     }
 
+    /**
+     * Affiche/masque les statistiques
+     */
     toggleStats() {
         const isVisible = this.elements.stats.style.display === 'block';
         this.elements.stats.style.display = isVisible ? 'none' : 'block';
@@ -403,6 +528,9 @@ class TicketScanner {
         }
     }
 
+    /**
+     * Charge les statistiques depuis le serveur
+     */
     async loadStats() {
         try {
             const response = await fetch('/scan-stats');
@@ -418,6 +546,10 @@ class TicketScanner {
         }
     }
 
+    /**
+     * Continue le scan après affichage d'un résultat
+     * Masque les résultats et redémarre le scanner
+     */
     continueScanning() {
         this.elements.resultContainer.style.display = 'none';
         this.elements.continueBtn.style.display = 'none';
@@ -427,19 +559,30 @@ class TicketScanner {
         this.startScan();
     }
 
+    /**
+     * Efface tous les résultats et statistiques
+     * Remet le scanner à zéro
+     */
     clearResults() {
         this.elements.resultContainer.style.display = 'none';
         this.elements.continueBtn.style.display = 'none';
         this.elements.statusIndicator.className = 'status-indicator';
+        
+        // Remise à zéro des statistiques
         this.stats = {
             totalScanned: 0,
             validTickets: 0,
             invalidTickets: 0
         };
-        this.scannedTickets.clear(); // Vider la liste des billets scannés
+        
+        // Vider la liste des billets scannés
+        this.scannedTickets.clear();
         this.updateStats();
     }
 
+    /**
+     * Sauvegarde les scans hors ligne dans le localStorage
+     */
     saveOfflineScans() {
         try {
             localStorage.setItem('offlineScans', JSON.stringify(this.offlineScans));
@@ -448,6 +591,9 @@ class TicketScanner {
         }
     }
 
+    /**
+     * Charge les scans hors ligne depuis le localStorage
+     */
     loadOfflineScans() {
         try {
             const saved = localStorage.getItem('offlineScans');
@@ -461,12 +607,18 @@ class TicketScanner {
     }
 }
 
-// Initialisation de l'application
+/**
+ * Initialisation de l'application
+ * Attend que le DOM soit chargé avant de créer l'instance du scanner
+ */
 document.addEventListener('DOMContentLoaded', () => {
     new TicketScanner();
 });
 
-// Gestion de l'installation PWA (si applicable)
+/**
+ * Gestion de l'installation PWA (Progressive Web App)
+ * Enregistre un service worker pour permettre l'installation sur mobile
+ */
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('/sw.js')

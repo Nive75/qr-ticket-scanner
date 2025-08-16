@@ -1,22 +1,100 @@
 {
+  /**
+   * 🎫 Scanner de QR Codes - Espace Comédie
+   * 
+   * Configuration du projet Node.js pour le scanner de QR codes
+   * Optimisé pour le scan uniquement (sans génération de QR codes)
+   * 
+   * @author Espace Comédie
+   * @version 1.0.0
+   */
   "name": "qr-ticket-scanner",
   "version": "1.0.0",
   "description": "Système de scan de QR codes pour billets de spectacles",
+  
+  /**
+   * Point d'entrée principal de l'application
+   * Utilise server-test.js comme serveur principal
+   */
   "main": "server-test.js",
+  
+  /**
+   * Scripts npm pour le développement et la production
+   */
   "scripts": {
+    /**
+     * Script de démarrage en production
+     * Lance le serveur de test sans mode développement
+     */
     "start": "node server-test.js",
+    
+    /**
+     * Script de développement avec rechargement automatique
+     * Utilise nodemon pour redémarrer automatiquement lors des modifications
+     */
     "dev": "nodemon server-test.js",
+    
+    /**
+     * Script de build pour le déploiement
+     * Installe les dépendances nécessaires
+     */
     "build": "npm install"
   },
+  
+  /**
+   * Dépendances de production
+   * Packages nécessaires au fonctionnement de l'application
+   */
   "dependencies": {
+    /**
+     * Framework web pour Node.js
+     * Gère les routes, middlewares et serveur HTTP
+     */
     "express": "^4.18.2",
+    
+    /**
+     * Middleware pour gérer les requêtes cross-origin (CORS)
+     * Permet les requêtes depuis le frontend
+     */
     "cors": "^2.8.5",
+    
+    /**
+     * Gestionnaire de variables d'environnement
+     * Charge les configurations depuis config.env
+     */
     "dotenv": "^16.3.1"
   },
+  
+  /**
+   * Dépendances de développement
+   * Packages utilisés uniquement pendant le développement
+   */
   "devDependencies": {
+    /**
+     * Outil de développement pour rechargement automatique
+     * Redémarre le serveur lors des modifications de fichiers
+     */
     "nodemon": "^3.0.2"
   },
-  "keywords": ["qr-code", "ticket", "scanner", "mysql", "nodejs"],
-  "author": "Your Name",
+  
+  /**
+   * Mots-clés pour la recherche et la catégorisation
+   */
+  "keywords": [
+    "qr-code",      // Scanner de QR codes
+    "ticket",       // Gestion de billets
+    "scanner",      // Application de scan
+    "mysql",        // Base de données (future)
+    "nodejs"        // Runtime JavaScript
+  ],
+  
+  /**
+   * Informations sur l'auteur
+   */
+  "author": "Espace Comédie",
+  
+  /**
+   * Licence du projet
+   */
   "license": "MIT"
 }
