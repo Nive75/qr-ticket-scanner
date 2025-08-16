@@ -150,14 +150,16 @@ class TicketScanner {
             // Activer le mode plein écran
             this.enableFullscreenMode();
 
-            // Configuration optimisée du scanner pour mobile
+            // Configuration optimisée du scanner pour une meilleure détection
             const config = {
-                fps: 10,                                    // Images par seconde
-                qrbox: { width: 300, height: 300 },        // Zone de détection
+                fps: 30,                                    // Images par seconde (augmenté pour plus de fluidité)
+                qrbox: { width: 400, height: 400 },        // Zone de détection agrandie
                 aspectRatio: 1.0,                          // Ratio d'aspect carré
                 disableFlip: false,                        // Permettre la rotation
+                supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA], // Seulement la caméra
                 experimentalFeatures: {
-                    useBarCodeDetectorIfSupported: true    // Utiliser le détecteur natif si disponible
+                    useBarCodeDetectorIfSupported: true,   // Utiliser le détecteur natif si disponible
+                    useMultiFormatReader: true            // Support multi-format
                 }
             };
 
@@ -166,22 +168,53 @@ class TicketScanner {
             
             console.log('Démarrage du scanner...');
             
-            // Démarrage du scan avec la caméra arrière sur mobile
-            await this.html5QrcodeScanner.start(
-                { facingMode: "environment" }, // Utiliser la caméra arrière
-                config,
-                // Callback de succès : QR code détecté
-                (decodedText, decodedResult) => {
-                    console.log('🎯 QR Code détecté!');
-                    console.log('📄 Contenu:', decodedText);
-                    console.log('🔍 Détails:', decodedResult);
-                    this.handleScanResult(decodedText);
+            // Essayer différentes configurations de caméra
+            const cameraConfigs = [
+                { 
+                    facingMode: "environment",
+                    width: { ideal: 1920 },
+                    height: { ideal: 1080 }
                 },
-                // Callback d'erreur : erreurs de scan (ignorées)
-                (errorMessage) => {
-                    console.log('⚠️ Scan error:', errorMessage);
+                { 
+                    facingMode: "environment",
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                },
+                { 
+                    facingMode: "environment"
                 }
-            );
+            ];
+
+            let started = false;
+            for (const cameraConfig of cameraConfigs) {
+                try {
+                    await this.html5QrcodeScanner.start(
+                        cameraConfig,
+                        config,
+                        // Callback de succès : QR code détecté
+                        (decodedText, decodedResult) => {
+                            console.log('🎯 QR Code détecté!');
+                            console.log('📄 Contenu:', decodedText);
+                            console.log('🔍 Détails:', decodedResult);
+                            this.handleScanResult(decodedText);
+                        },
+                        // Callback d'erreur : erreurs de scan (ignorées)
+                        (errorMessage) => {
+                            console.log('⚠️ Scan error:', errorMessage);
+                        }
+                    );
+                    started = true;
+                    console.log('Scanner démarré avec succès avec la configuration:', cameraConfig);
+                    break;
+                } catch (configError) {
+                    console.log('Échec avec la configuration:', cameraConfig, configError);
+                    continue;
+                }
+            }
+
+            if (!started) {
+                throw new Error('Aucune configuration de caméra n\'a fonctionné');
+            }
 
         } catch (error) {
             console.error('Erreur lors du démarrage du scan:', error);
