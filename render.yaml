@@ -37,3 +37,7 @@ services:
       # URL du frontend pour CORS
       - key: FRONTEND_URL
         value: https://qr-ticket-scanner.onrender.com
+        
+      # Mot de passe d'accès au scanner
+      - key: ADMIN_PASSWORD
+        value: EspaceComedie2024!

@@ -62,6 +62,7 @@ class TicketScanner {
             clearResultsBtn: document.getElementById('clearResultsBtn'),  // Bouton effacer les résultats
             testBtn: document.getElementById('testBtn'),                  // Bouton test du scanner
             continueBtn: document.getElementById('continueBtn'),          // Bouton continuer le scan
+            logoutBtn: document.getElementById('logoutBtn'),              // Bouton de déconnexion
             
             // Éléments d'affichage des résultats
             resultContainer: document.getElementById('resultContainer'),  // Conteneur des résultats
@@ -91,6 +92,7 @@ class TicketScanner {
         this.elements.clearResultsBtn.addEventListener('click', () => this.clearResults());
         this.elements.testBtn.addEventListener('click', () => this.testScanner());
         this.elements.continueBtn.addEventListener('click', () => this.continueScanning());
+        this.elements.logoutBtn.addEventListener('click', () => this.logout());
         
         // Événements de connectivité réseau
         window.addEventListener('online', () => this.handleOnlineStatus(true));
@@ -605,6 +607,39 @@ class TicketScanner {
             this.offlineScans = [];
         }
     }
+
+    /**
+     * Déconnexion de l'utilisateur
+     * Efface la session et redirige vers la page de connexion
+     */
+    logout() {
+        // Confirmation de déconnexion
+        if (confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
+            // Effacer la session
+            sessionStorage.removeItem('qr_scanner_authenticated');
+            
+            // Arrêter le scan si en cours
+            if (this.isScanning) {
+                this.stopScan();
+            }
+            
+            // Rediriger vers la page de connexion
+            window.location.href = '/login';
+        }
+    }
+}
+
+/**
+ * Vérification d'authentification
+ * Redirige vers la page de connexion si non authentifié
+ */
+function checkAuthentication() {
+    const isAuthenticated = sessionStorage.getItem('qr_scanner_authenticated');
+    if (isAuthenticated !== 'true') {
+        window.location.href = '/login';
+        return false;
+    }
+    return true;
 }
 
 /**
@@ -612,7 +647,10 @@ class TicketScanner {
  * Attend que le DOM soit chargé avant de créer l'instance du scanner
  */
 document.addEventListener('DOMContentLoaded', () => {
-    new TicketScanner();
+    // Vérifier l'authentification avant d'initialiser le scanner
+    if (checkAuthentication()) {
+        new TicketScanner();
+    }
 });
 
 /**

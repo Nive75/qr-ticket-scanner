@@ -43,16 +43,32 @@ npm start
 
 **Accédez à** `http://localhost:3001/scan`
 
+## 🔐 Sécurité
+
+### Authentification
+- **Mot de passe requis** : Accès protégé par mot de passe
+- **Session sécurisée** : Authentification persistante pendant la session
+- **Déconnexion** : Bouton de déconnexion disponible
+
+### Mot de passe par défaut
+```
+EspaceComedie2024!
+```
+
+⚠️ **IMPORTANT** : Changez ce mot de passe en production !
+
 ## 📱 Utilisation
 
-1. **Ouvrez** l'application sur votre mobile
-2. **Cliquez sur "Scan"** pour démarrer la caméra
-3. **Pointez** vers un QR code de billet
-4. **Voyez le résultat** :
+1. **Accédez** à l'application sur votre mobile
+2. **Entrez** le mot de passe d'accès
+3. **Cliquez sur "Scan"** pour démarrer la caméra
+4. **Pointez** vers un QR code de billet
+5. **Voyez le résultat** :
    - 🟢 **Vert** : Billet valide
    - 🟠 **Orange** : Billet déjà utilisé
    - 🔴 **Rouge** : QR code invalide
-5. **Cliquez "OK - Scanner suivant"** pour continuer
+6. **Cliquez "OK - Scanner suivant"** pour continuer
+7. **Déconnectez-vous** avec le bouton "🔓 Déconnexion"
 
 ## 🔧 Format QR Code
 
@@ -175,6 +191,9 @@ DB_NAME=espace_comedie
 
 # Sécurité (future)
 JWT_SECRET=Apres_lheure_cest_plus_lheure_franchement
+
+# Authentification
+ADMIN_PASSWORD=EspaceComedie2024!
 ```
 
 ### Dépendances Principales

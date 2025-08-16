@@ -3,6 +3,7 @@
  * 
  * Ce serveur gère la vérification des billets scannés via QR codes.
  * Il fonctionne en mode TEST sans connexion à la base de données.
+ * Inclut un système d'authentification par mot de passe.
  * 
  * @author Espace Comédie
  * @version 1.0.0
@@ -13,6 +14,9 @@ const express = require('express');        // Framework web pour Node.js
 const cors = require('cors');              // Middleware pour gérer les requêtes cross-origin
 const path = require('path');              // Module pour manipuler les chemins de fichiers
 require('dotenv').config({ path: './config.env' }); // Chargement des variables d'environnement
+
+// Configuration du mot de passe (en production, utiliser des variables d'environnement)
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'EspaceComedie2024!';
 
 // Initialisation de l'application Express
 const app = express();
@@ -38,8 +42,65 @@ app.use(express.static('public'));
  */
 
 /**
+ * Route GET / (page d'accueil)
+ * Redirige vers la page de connexion
+ */
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
+
+/**
+ * Route GET /login
+ * Sert la page HTML de connexion
+ */
+app.get('/login', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
+
+/**
+ * Route POST /verify-password
+ * Vérifie le mot de passe d'authentification
+ * 
+ * @param {Object} req.body.password - Mot de passe à vérifier
+ * @returns {Object} Résultat de la vérification
+ */
+app.post('/verify-password', async (req, res) => {
+  try {
+    const { password } = req.body;
+    
+    if (!password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Mot de passe requis'
+      });
+    }
+
+    // Vérification du mot de passe
+    if (password === ADMIN_PASSWORD) {
+      return res.status(200).json({
+        success: true,
+        message: 'Authentification réussie'
+      });
+    } else {
+      return res.status(401).json({
+        success: false,
+        message: 'Mot de passe incorrect'
+      });
+    }
+
+  } catch (error) {
+    console.error('Erreur lors de la vérification du mot de passe:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Erreur interne du serveur'
+    });
+  }
+});
+
+/**
  * Route GET /scan
  * Sert la page HTML du scanner de QR codes
+ * (Protégée par authentification côté client)
  */
 app.get('/scan', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'scan.html'));

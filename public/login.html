@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion - Scanner de Billets</title>
+    <style>
+        /**
+         * 🔐 Styles CSS pour la page de connexion
+         * Design moderne et sécurisé
+         */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .header {
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .login-btn:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+
+        .login-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+            border: 1px solid #ffcdd2;
+        }
+
+        .success-message {
+            background: #e8f5e8;
+            color: #2e7d32;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+            border: 1px solid #c8e6c9;
+        }
+
+        .security-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .security-info h4 {
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="header">
+            <h1>🔐 Connexion</h1>
+            <p>Scanner de Billets - Espace Comédie</p>
+        </div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="password">Mot de passe</label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    name="password" 
+                    placeholder="Entrez le mot de passe"
+                    required
+                    autocomplete="current-password"
+                >
+            </div>
+
+            <button type="submit" class="login-btn" id="loginBtn">
+                Se connecter
+            </button>
+        </form>
+
+        <div class="error-message" id="errorMessage"></div>
+        <div class="success-message" id="successMessage"></div>
+
+        <div class="security-info">
+            <h4>🔒 Sécurité</h4>
+            <p>Cette page est protégée par mot de passe pour sécuriser l'accès au scanner de billets.</p>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * 🔐 Script de gestion de la connexion
+         * Gère l'authentification et la redirection
+         */
+
+        class LoginManager {
+            constructor() {
+                this.form = document.getElementById('loginForm');
+                this.passwordInput = document.getElementById('password');
+                this.loginBtn = document.getElementById('loginBtn');
+                this.errorMessage = document.getElementById('errorMessage');
+                this.successMessage = document.getElementById('successMessage');
+                
+                this.bindEvents();
+                this.checkExistingSession();
+            }
+
+            /**
+             * Lie les événements aux éléments
+             */
+            bindEvents() {
+                this.form.addEventListener('submit', (e) => this.handleLogin(e));
+                this.passwordInput.addEventListener('input', () => this.clearMessages());
+            }
+
+            /**
+             * Vérifie si une session existe déjà
+             */
+            checkExistingSession() {
+                const isAuthenticated = sessionStorage.getItem('qr_scanner_authenticated');
+                if (isAuthenticated === 'true') {
+                    this.redirectToScanner();
+                }
+            }
+
+            /**
+             * Gère la soumission du formulaire de connexion
+             */
+            async handleLogin(e) {
+                e.preventDefault();
+                
+                const password = this.passwordInput.value.trim();
+                
+                if (!password) {
+                    this.showError('Veuillez entrer un mot de passe');
+                    return;
+                }
+
+                this.setLoading(true);
+
+                try {
+                    // Vérification du mot de passe via l'API
+                    const response = await fetch('/verify-password', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ password })
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        this.showSuccess('Connexion réussie ! Redirection...');
+                        sessionStorage.setItem('qr_scanner_authenticated', 'true');
+                        
+                        // Redirection après un délai
+                        setTimeout(() => {
+                            this.redirectToScanner();
+                        }, 1000);
+                    } else {
+                        this.showError(result.message || 'Mot de passe incorrect');
+                        this.passwordInput.value = '';
+                        this.passwordInput.focus();
+                    }
+                } catch (error) {
+                    console.error('Erreur de connexion:', error);
+                    this.showError('Erreur de connexion. Veuillez réessayer.');
+                } finally {
+                    this.setLoading(false);
+                }
+            }
+
+            /**
+             * Affiche un message d'erreur
+             */
+            showError(message) {
+                this.errorMessage.textContent = message;
+                this.errorMessage.style.display = 'block';
+                this.successMessage.style.display = 'none';
+            }
+
+            /**
+             * Affiche un message de succès
+             */
+            showSuccess(message) {
+                this.successMessage.textContent = message;
+                this.successMessage.style.display = 'block';
+                this.errorMessage.style.display = 'none';
+            }
+
+            /**
+             * Efface tous les messages
+             */
+            clearMessages() {
+                this.errorMessage.style.display = 'none';
+                this.successMessage.style.display = 'none';
+            }
+
+            /**
+             * Active/désactive l'état de chargement
+             */
+            setLoading(loading) {
+                this.loginBtn.disabled = loading;
+                this.loginBtn.textContent = loading ? 'Connexion...' : 'Se connecter';
+            }
+
+            /**
+             * Redirige vers la page du scanner
+             */
+            redirectToScanner() {
+                window.location.href = '/scan';
+            }
+        }
+
+        // Initialisation de la gestion de connexion
+        document.addEventListener('DOMContentLoaded', () => {
+            new LoginManager();
+        });
+    </script>
+</body>
+</html>
