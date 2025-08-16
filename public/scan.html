@@ -46,6 +46,7 @@
             color: var(--text-primary);
             line-height: 1.6;
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
         /* Header principal */
@@ -57,6 +58,12 @@
             top: 0;
             z-index: 100;
             box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .header.scanning {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
         }
 
         .header-content {
@@ -96,6 +103,12 @@
             max-width: 1200px;
             margin: 0 auto;
             padding: 2rem 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .main-container.scanning {
+            max-width: none;
+            padding: 0;
         }
 
         /* Grille de layout */
@@ -104,6 +117,12 @@
             grid-template-columns: 1fr 400px;
             gap: 2rem;
             align-items: start;
+            transition: all 0.3s ease;
+        }
+
+        .layout-grid.scanning {
+            grid-template-columns: 1fr;
+            gap: 0;
         }
 
         /* Zone principale du scanner */
@@ -113,11 +132,28 @@
             padding: 2rem;
             box-shadow: var(--shadow);
             border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .scanner-section.scanning {
+            background: #000;
+            border-radius: 0;
+            padding: 0;
+            box-shadow: none;
+            border: none;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
         .scanner-header {
             margin-bottom: 2rem;
             text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .scanner-section.scanning .scanner-header {
+            display: none;
         }
 
         .scanner-title {
@@ -136,6 +172,15 @@
         .scanner-container {
             position: relative;
             margin: 2rem 0;
+            transition: all 0.3s ease;
+        }
+
+        .scanner-section.scanning .scanner-container {
+            margin: 0;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         #reader {
@@ -146,6 +191,15 @@
             overflow: hidden;
             box-shadow: var(--shadow-lg);
             border: 2px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .scanner-section.scanning #reader {
+            max-width: 100%;
+            border-radius: 0;
+            box-shadow: none;
+            border: none;
+            height: 100%;
         }
 
         /* Indicateur de statut */
@@ -157,6 +211,16 @@
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
+        }
+
+        .scanner-section.scanning .status-indicator {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            margin: 0;
+            z-index: 1000;
         }
 
         .status-indicator.scanning {
@@ -184,6 +248,19 @@
             justify-content: center;
             margin: 2rem 0;
             flex-wrap: wrap;
+            transition: all 0.3s ease;
+        }
+
+        .scanner-section.scanning .scanner-controls {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 1rem;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            z-index: 1000;
         }
 
         /* Boutons */
@@ -248,6 +325,17 @@
             transform: none;
         }
 
+        /* Boutons en mode scan */
+        .scanner-section.scanning .btn {
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--text-primary);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .scanner-section.scanning .btn:hover {
+            background: rgba(255, 255, 255, 1);
+        }
+
         /* Zone des résultats */
         .result-container {
             background: var(--surface);
@@ -257,6 +345,18 @@
             display: none;
             border: 1px solid var(--border);
             animation: slideIn 0.3s ease;
+            transition: all 0.3s ease;
+        }
+
+        .scanner-section.scanning .result-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 90vw;
+            width: 500px;
+            z-index: 1001;
+            box-shadow: var(--shadow-lg);
         }
 
         .result-container.success {
@@ -329,6 +429,19 @@
             display: none;
             text-align: center;
             padding: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .scanner-section.scanning .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            border-radius: 12px;
+            padding: 2rem;
+            z-index: 1001;
         }
 
         .spinner {
@@ -339,6 +452,11 @@
             height: 32px;
             animation: spin 1s linear infinite;
             margin: 0 auto 1rem;
+        }
+
+        .scanner-section.scanning .spinner {
+            border-color: rgba(255, 255, 255, 0.3);
+            border-top-color: white;
         }
 
         @keyframes spin {
@@ -356,6 +474,15 @@
             display: none;
             font-size: 0.875rem;
             font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .scanner-section.scanning .offline-indicator {
+            position: fixed;
+            top: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
         }
 
         /* Sidebar */
@@ -363,6 +490,11 @@
             display: flex;
             flex-direction: column;
             gap: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar.scanning {
+            display: none;
         }
 
         /* Cartes d'information */
@@ -425,6 +557,43 @@
             justify-content: flex-start;
         }
 
+        /* Overlay pour mode scan */
+        .scan-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #000;
+            z-index: 999;
+            display: none;
+        }
+
+        .scan-overlay.active {
+            display: block;
+        }
+
+        /* Instructions de scan */
+        .scan-instructions {
+            position: fixed;
+            top: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            z-index: 1000;
+            display: none;
+            backdrop-filter: blur(10px);
+        }
+
+        .scanner-section.scanning .scan-instructions {
+            display: block;
+        }
+
         /* Responsive */
         @media (max-width: 1024px) {
             .layout-grid {
@@ -460,6 +629,19 @@
                 gap: 1rem;
                 text-align: center;
             }
+
+            .scanner-section.scanning .scanner-controls {
+                bottom: 1rem;
+                left: 1rem;
+                right: 1rem;
+                transform: none;
+                width: auto;
+            }
+
+            .scanner-section.scanning .result-container {
+                width: 95vw;
+                max-width: none;
+            }
         }
 
         /* Animations subtiles */
@@ -492,7 +674,7 @@
 </head>
 <body>
     <!-- Header -->
-    <header class="header">
+    <header class="header" id="header">
         <div class="header-content">
             <div class="header-title">
                 <div>
@@ -508,11 +690,19 @@
         </div>
     </header>
 
+    <!-- Overlay pour mode scan -->
+    <div class="scan-overlay" id="scanOverlay"></div>
+
     <!-- Contenu principal -->
-    <main class="main-container">
-        <div class="layout-grid">
+    <main class="main-container" id="mainContainer">
+        <div class="layout-grid" id="layoutGrid">
             <!-- Section principale du scanner -->
-            <section class="scanner-section">
+            <section class="scanner-section" id="scannerSection">
+                <!-- Instructions de scan -->
+                <div class="scan-instructions" id="scanInstructions">
+                    📱 Pointez la caméra vers le QR code du billet
+                </div>
+
                 <!-- Indicateur hors ligne -->
                 <div class="offline-indicator" id="offlineIndicator">
                     ⚠️ Mode hors ligne - Les scans seront sauvegardés localement
@@ -562,7 +752,7 @@
             </section>
 
             <!-- Sidebar -->
-            <aside class="sidebar">
+            <aside class="sidebar" id="sidebar">
                 <!-- Statistiques -->
                 <div class="info-card">
                     <h3>📊 Statistiques du Jour</h3>

@@ -147,6 +147,9 @@ class TicketScanner {
             this.elements.stopScanBtn.style.display = 'inline-block';
             this.elements.statusIndicator.className = 'status-indicator scanning';
 
+            // Activer le mode plein écran
+            this.enableFullscreenMode();
+
             // Configuration optimisée du scanner pour mobile
             const config = {
                 fps: 10,                                    // Images par seconde
@@ -209,6 +212,9 @@ class TicketScanner {
         this.elements.startScanBtn.style.display = 'inline-block';
         this.elements.stopScanBtn.style.display = 'none';
         this.elements.statusIndicator.className = 'status-indicator';
+
+        // Désactiver le mode plein écran
+        this.disableFullscreenMode();
     }
 
     /**
@@ -606,6 +612,38 @@ class TicketScanner {
             console.error('Erreur lors du chargement des scans hors ligne:', error);
             this.offlineScans = [];
         }
+    }
+
+    /**
+     * Active le mode plein écran pour le scan
+     */
+    enableFullscreenMode() {
+        // Ajouter les classes CSS pour le mode plein écran
+        document.getElementById('header').classList.add('scanning');
+        document.getElementById('mainContainer').classList.add('scanning');
+        document.getElementById('layoutGrid').classList.add('scanning');
+        document.getElementById('scannerSection').classList.add('scanning');
+        document.getElementById('sidebar').classList.add('scanning');
+        document.getElementById('scanOverlay').classList.add('active');
+
+        // Masquer le scroll du body
+        document.body.style.overflow = 'hidden';
+    }
+
+    /**
+     * Désactive le mode plein écran
+     */
+    disableFullscreenMode() {
+        // Retirer les classes CSS pour le mode plein écran
+        document.getElementById('header').classList.remove('scanning');
+        document.getElementById('mainContainer').classList.remove('scanning');
+        document.getElementById('layoutGrid').classList.remove('scanning');
+        document.getElementById('scannerSection').classList.remove('scanning');
+        document.getElementById('sidebar').classList.remove('scanning');
+        document.getElementById('scanOverlay').classList.remove('active');
+
+        // Restaurer le scroll du body
+        document.body.style.overflow = '';
     }
 
     /**
