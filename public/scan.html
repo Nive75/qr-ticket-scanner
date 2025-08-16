@@ -2,7 +2,6 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <!-- Configuration du viewport pour l'optimisation mobile -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scanner de Billets - Espace Comédie</title>
     
@@ -11,11 +10,29 @@
     
     <style>
         /**
-         * 🎫 Styles CSS pour le Scanner de QR Codes
-         * Design moderne et responsive optimisé pour mobile
+         * 🎫 Styles CSS pour le Scanner de QR Codes - Version Professionnelle
+         * Design moderne et ergonomique optimisé pour les employés
          */
 
-        /* Reset CSS de base */
+        /* Variables CSS pour la cohérence des couleurs */
+        :root {
+            --primary: #1e40af;
+            --primary-light: #3b82f6;
+            --primary-dark: #1e3a8a;
+            --secondary: #64748b;
+            --success: #059669;
+            --warning: #d97706;
+            --error: #dc2626;
+            --background: #f8fafc;
+            --surface: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Reset CSS moderne */
         * {
             margin: 0;
             padding: 0;
@@ -24,129 +41,248 @@
 
         /* Style du corps de la page */
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            /* Dégradé de fond moderne */
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--background);
+            color: var(--text-primary);
+            line-height: 1.6;
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
         }
 
-        /* Conteneur principal de l'application */
-        .container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            padding: 30px;
-            max-width: 600px;
-            width: 100%;
+        /* Header principal */
+        .header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .header-title h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .header-subtitle {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        /* Conteneur principal */
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        /* Grille de layout */
+        .layout-grid {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        /* Zone principale du scanner */
+        .scanner-section {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .scanner-header {
+            margin-bottom: 2rem;
             text-align: center;
         }
 
-        /* En-tête de l'application */
-        .header {
-            margin-bottom: 30px;
+        .scanner-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
         }
 
-        .header h1 {
-            color: #333;
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            font-weight: 700;
+        .scanner-description {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
         }
 
-        .header p {
-            color: #666;
-            font-size: 1.1rem;
-        }
-
-        /* Zone de conteneur du scanner */
+        /* Zone du scanner QR */
         .scanner-container {
-            margin: 30px 0;
             position: relative;
+            margin: 2rem 0;
         }
 
-        /* Zone d'affichage du scanner QR */
         #reader {
             width: 100%;
-            max-width: 400px;
+            max-width: 500px;
             margin: 0 auto;
-            border-radius: 15px;
+            border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            box-shadow: var(--shadow-lg);
+            border: 2px solid var(--border);
         }
 
-        /* Indicateur de statut du scanner */
+        /* Indicateur de statut */
         .status-indicator {
-            height: 8px;
-            background: #e0e0e0;
-            border-radius: 4px;
-            margin: 20px 0;
-            transition: background 0.3s ease;
+            height: 4px;
+            background: var(--border);
+            border-radius: 2px;
+            margin: 1.5rem 0;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
 
-        /* États de l'indicateur de statut */
         .status-indicator.scanning {
-            background: #ffd700; /* Jaune pour scan en cours */
+            background: var(--warning);
             animation: pulse 2s infinite;
         }
 
         .status-indicator.success {
-            background: #4CAF50; /* Vert pour succès */
+            background: var(--success);
         }
 
         .status-indicator.error {
-            background: #f44336; /* Rouge pour erreur */
+            background: var(--error);
         }
 
-        /* Animation de pulsation pour le scan */
         @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
         }
 
-        /* Conteneur des résultats de scan */
+        /* Contrôles du scanner */
+        .scanner-controls {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        /* Boutons */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            min-width: 120px;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: var(--surface);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--background);
+            border-color: var(--primary-light);
+        }
+
+        .btn-danger {
+            background: var(--error);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #b45309;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Zone des résultats */
         .result-container {
-            margin-top: 30px;
-            padding: 20px;
-            border-radius: 15px;
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
             display: none;
+            border: 1px solid var(--border);
             animation: slideIn 0.3s ease;
         }
 
-        /* Styles des résultats selon le type */
         .result-container.success {
-            background: #e8f5e8; /* Fond vert clair */
-            border: 2px solid #4CAF50;
-            color: #2e7d32;
+            border-color: var(--success);
+            background: #f0fdf4;
         }
 
         .result-container.error {
-            background: #ffebee; /* Fond rouge clair */
-            border: 2px solid #f44336;
-            color: #c62828;
+            border-color: var(--error);
+            background: #fef2f2;
         }
 
         .result-container.warning {
-            background: #fff3e0; /* Fond orange clair */
-            border: 2px solid #ff9800;
-            color: #ef6c00;
+            border-color: var(--warning);
+            background: #fffbeb;
         }
 
         .result-container.used {
-            background: #fff8e1; /* Fond jaune clair */
-            border: 2px solid #ffc107;
-            color: #f57f17;
+            border-color: var(--warning);
+            background: #fef3c7;
         }
 
-        /* Animation d'apparition des résultats */
         @keyframes slideIn {
             from {
                 opacity: 0;
-                transform: translateY(-20px);
+                transform: translateY(-10px);
             }
             to {
                 opacity: 1;
@@ -154,274 +290,323 @@
             }
         }
 
-        /* Titre du résultat */
         .result-title {
-            font-size: 1.5rem;
+            font-size: 1.125rem;
             font-weight: 600;
-            margin-bottom: 15px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
-        /* Zone d'informations du billet */
         .ticket-info {
-            background: rgba(255, 255, 255, 0.8);
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 15px;
-            text-align: left;
+            background: var(--surface);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            border: 1px solid var(--border);
         }
 
         .ticket-info h3 {
-            margin-bottom: 10px;
-            color: #333;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
         }
 
         .ticket-info p {
-            margin: 5px 0;
-            color: #555;
+            margin: 0.5rem 0;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
         }
 
-        /* Zone des boutons de contrôle */
-        .controls {
-            margin-top: 30px;
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        /* Styles de base des boutons */
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 25px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        /* Variantes de couleurs des boutons */
-        .btn-primary {
-            background: #667eea;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #5a6fd8;
-            transform: translateY(-2px);
-        }
-
-        .btn-secondary {
-            background: #f5f5f5;
-            color: #333;
-            border: 2px solid #ddd;
-        }
-
-        .btn-secondary:hover {
-            background: #e0e0e0;
-        }
-
-        .btn-danger {
-            background: #f44336;
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #d32f2f;
-        }
-
-        .btn-warning {
-            background: #ff9800;
-            color: white;
-        }
-
-        .btn-warning:hover {
-            background: #f57c00;
-        }
-
-        /* Zone des statistiques */
-        .stats {
-            margin-top: 30px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 15px;
-            display: none;
-        }
-
-        .stats h3 {
-            margin-bottom: 15px;
-            color: #333;
-        }
-
-        /* Grille des statistiques */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-        }
-
-        /* Éléments individuels des statistiques */
-        .stat-item {
-            background: white;
-            padding: 15px;
-            border-radius: 10px;
-            text-align: center;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .stat-number {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #667eea;
-        }
-
-        .stat-label {
-            font-size: 0.9rem;
-            color: #666;
-            margin-top: 5px;
+        .ticket-info strong {
+            color: var(--text-primary);
         }
 
         /* Indicateur de chargement */
         .loading {
             display: none;
             text-align: center;
-            margin: 20px 0;
+            padding: 2rem;
         }
 
-        /* Spinner de chargement */
         .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
+            border: 3px solid var(--border);
+            border-top: 3px solid var(--primary);
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            width: 32px;
+            height: 32px;
             animation: spin 1s linear infinite;
-            margin: 0 auto 10px;
+            margin: 0 auto 1rem;
         }
 
-        /* Animation de rotation du spinner */
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
 
-        /* Messages d'erreur */
-        .error-message {
-            color: #f44336;
-            margin-top: 10px;
-            font-size: 0.9rem;
-        }
-
-        /* Indicateur de mode hors ligne */
+        /* Indicateur hors ligne */
         .offline-indicator {
-            background: #ff9800;
+            background: var(--warning);
             color: white;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 20px;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
             display: none;
+            font-size: 0.875rem;
+            font-weight: 500;
         }
 
-        /**
-         * Styles responsives pour mobile
-         */
+        /* Sidebar */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* Cartes d'information */
+        .info-card {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .info-card h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Statistiques */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .stat-item {
+            background: var(--background);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Actions rapides */
+        .quick-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .quick-actions .btn {
+            width: 100%;
+            justify-content: flex-start;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .layout-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                order: -1;
+            }
+        }
+
         @media (max-width: 768px) {
-            .container {
-                padding: 20px;
-                margin: 10px;
+            .main-container {
+                padding: 1rem;
             }
-
-            .header h1 {
-                font-size: 2rem;
+            
+            .scanner-section {
+                padding: 1.5rem;
             }
-
-            .controls {
+            
+            .scanner-controls {
                 flex-direction: column;
                 align-items: center;
             }
-
+            
             .btn {
                 width: 100%;
                 max-width: 300px;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+        }
+
+        /* Animations subtiles */
+        .fade-in {
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* États de focus pour l'accessibilité */
+        .btn:focus {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+        }
+
+        /* Mode sombre (optionnel) */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --background: #0f172a;
+                --surface: #1e293b;
+                --text-primary: #f1f5f9;
+                --text-secondary: #94a3b8;
+                --border: #334155;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Conteneur principal de l'application -->
-    <div class="container">
-        <!-- En-tête avec titre et description -->
-        <div class="header">
-            <h1>🎫 Scanner de Billets</h1>
-            <p>Espace Comédie - Vérification des billets</p>
-        </div>
-
-        <!-- Indicateur de mode hors ligne -->
-        <div class="offline-indicator" id="offlineIndicator">
-            ⚠️ Mode hors ligne - Les scans seront sauvegardés localement
-        </div>
-
-        <!-- Indicateur de statut du scanner -->
-        <div class="status-indicator" id="statusIndicator"></div>
-
-        <!-- Zone du scanner QR -->
-        <div class="scanner-container">
-            <div id="reader"></div>
-        </div>
-
-        <!-- Indicateur de chargement -->
-        <div class="loading" id="loading">
-            <div class="spinner"></div>
-            <p>Vérification du billet en cours...</p>
-        </div>
-
-        <!-- Zone d'affichage des résultats -->
-        <div class="result-container" id="resultContainer">
-            <div class="result-title" id="resultTitle"></div>
-            <div class="ticket-info" id="ticketInfo"></div>
-            <!-- Bouton pour continuer le scan -->
-            <button class="btn btn-primary" id="continueBtn" style="margin-top: 15px; display: none;">OK - Scanner suivant</button>
-        </div>
-
-        <!-- Zone des boutons de contrôle -->
-        <div class="controls">
-            <!-- Boutons de contrôle du scanner -->
-            <button class="btn btn-primary" id="startScanBtn">Démarrer le Scan</button>
-            <button class="btn btn-secondary" id="stopScanBtn" style="display: none;">Arrêter le Scan</button>
-            
-            <!-- Boutons d'utilitaires -->
-            <button class="btn btn-secondary" id="showStatsBtn">Statistiques</button>
-            <button class="btn btn-danger" id="clearResultsBtn">Effacer</button>
-            <button class="btn btn-warning" id="testBtn">Scan</button>
-            
-            <!-- Bouton de déconnexion -->
-            <button class="btn btn-secondary" id="logoutBtn" style="background: #6c757d;">🔓 Déconnexion</button>
-        </div>
-
-        <!-- Zone des statistiques -->
-        <div class="stats" id="stats">
-            <h3>📊 Statistiques du Jour</h3>
-            <div class="stats-grid">
-                <!-- Statistique : Total scannés -->
-                <div class="stat-item">
-                    <div class="stat-number" id="totalScanned">0</div>
-                    <div class="stat-label">Total Scannés</div>
-                </div>
-                <!-- Statistique : Billets valides -->
-                <div class="stat-item">
-                    <div class="stat-number" id="validTickets">0</div>
-                    <div class="stat-label">Billets Valides</div>
-                </div>
-                <!-- Statistique : Billets invalides -->
-                <div class="stat-item">
-                    <div class="stat-number" id="invalidTickets">0</div>
-                    <div class="stat-label">Billets Invalides</div>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="header-title">
+                <div>
+                    <h1>🎫 Scanner de Billets</h1>
+                    <div class="header-subtitle">Espace Comédie - Interface Employé</div>
                 </div>
             </div>
+            <div class="header-actions">
+                <button class="btn btn-secondary" id="logoutBtn">
+                    🔓 Déconnexion
+                </button>
+            </div>
         </div>
-    </div>
+    </header>
+
+    <!-- Contenu principal -->
+    <main class="main-container">
+        <div class="layout-grid">
+            <!-- Section principale du scanner -->
+            <section class="scanner-section">
+                <!-- Indicateur hors ligne -->
+                <div class="offline-indicator" id="offlineIndicator">
+                    ⚠️ Mode hors ligne - Les scans seront sauvegardés localement
+                </div>
+
+                <!-- En-tête du scanner -->
+                <div class="scanner-header">
+                    <h2 class="scanner-title">Scanner de QR Codes</h2>
+                    <p class="scanner-description">Pointez la caméra vers un QR code de billet pour le vérifier</p>
+                </div>
+
+                <!-- Indicateur de statut -->
+                <div class="status-indicator" id="statusIndicator"></div>
+
+                <!-- Zone du scanner -->
+                <div class="scanner-container">
+                    <div id="reader"></div>
+                </div>
+
+                <!-- Indicateur de chargement -->
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Vérification du billet en cours...</p>
+                </div>
+
+                <!-- Zone d'affichage des résultats -->
+                <div class="result-container" id="resultContainer">
+                    <div class="result-title" id="resultTitle"></div>
+                    <div class="ticket-info" id="ticketInfo"></div>
+                    <button class="btn btn-primary" id="continueBtn" style="margin-top: 1rem; display: none;">
+                        ✅ Continuer le scan
+                    </button>
+                </div>
+
+                <!-- Contrôles du scanner -->
+                <div class="scanner-controls">
+                    <button class="btn btn-primary" id="startScanBtn">
+                        📷 Démarrer le Scan
+                    </button>
+                    <button class="btn btn-secondary" id="stopScanBtn" style="display: none;">
+                        ⏹️ Arrêter le Scan
+                    </button>
+                    <button class="btn btn-warning" id="testBtn">
+                        🔍 Scan Rapide
+                    </button>
+                </div>
+            </section>
+
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <!-- Statistiques -->
+                <div class="info-card">
+                    <h3>📊 Statistiques du Jour</h3>
+                    <div class="stats-grid" id="stats">
+                        <div class="stat-item">
+                            <div class="stat-number" id="totalScanned">0</div>
+                            <div class="stat-label">Total Scannés</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="validTickets">0</div>
+                            <div class="stat-label">Billets Valides</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="invalidTickets">0</div>
+                            <div class="stat-label">Billets Invalides</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions rapides -->
+                <div class="info-card">
+                    <h3>⚡ Actions Rapides</h3>
+                    <div class="quick-actions">
+                        <button class="btn btn-secondary" id="showStatsBtn">
+                            📈 Voir Statistiques
+                        </button>
+                        <button class="btn btn-danger" id="clearResultsBtn">
+                            🗑️ Effacer Tout
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Informations système -->
+                <div class="info-card">
+                    <h3>ℹ️ Informations</h3>
+                    <div style="font-size: 0.875rem; color: var(--text-secondary);">
+                        <p><strong>Version:</strong> 1.0.0</p>
+                        <p><strong>Mode:</strong> Test</p>
+                        <p><strong>Statut:</strong> <span id="systemStatus">En ligne</span></p>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </main>
 
     <!-- Script principal de l'application -->
     <script src="scan.js"></script>
